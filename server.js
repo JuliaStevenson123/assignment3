@@ -90,15 +90,15 @@ app.get("/login", async (req, res) => {
   res.render("login", { accountNotFound: "" });
 });
 app.post("/login", async (req, res) => {
-  //const { username, password } = req.body;
+  const { username, password } = req.body;
 
   //Get user from database
-  const user = await Users.find({ username, password });
+  const user = await Users.find({ username: username, password: password });
   
   if (!user.length) { //User and pass word not correct or user not found
     res.render("login", { accountNotFound: "User and password not found. Please try again or register." });
   } else { //Login User
-    req.session.user = username; //Store username in session
+    req.session.user = user[0]; //Store user in session
     console.log("User logged in: " + req.session.user);
     res.redirect("dashboard");
   }
@@ -113,8 +113,9 @@ app.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
 
   //See if user or email already exists in database
-  const users = await Users.find({username}) + Users.find({email});
+  const users = await Users.find({username}) + await Users.find({email});
 
+  console.log(users)
   if (users.length) { //User already Found
     res.render("register", { accountFound: "User already exists. Please try again or login." });
   } else { //Create new user
@@ -127,7 +128,7 @@ app.post("/register", async (req, res) => {
 });
 
 app.get("/dashboard", ensureLogin, (req, res) => {
-  res.render("dashboard", { username: req.session.user });
+  res.render("dashboard", { username: req.session.user.username });
 });
 
 //Make sure user is logged in
