@@ -11,7 +11,7 @@ app.use(
   clientSessions({
     cookieName: "session", // this is the object name that will be added to 'req'
     secret: "o6LjQ5EVNC28ZgK64hDELM18ScpFQr", // this should be a long un-guessable string.
-    duration: 2 * 60 * 1000, // duration of the session in milliseconds (2 minutes)
+    duration: 30 * 60 * 1000, // duration of the session in milliseconds (30 minutes)
     activeDuration: 1000 * 60, // the session will be extended by this many ms each request (1 minute)
   }),
 );
@@ -46,7 +46,7 @@ app.post("/login", async (req, res) => {
   if (!user.length) { //User and pass word not correct or user not found
     res.render("login", { accountNotFound: "User and password not found. Please try again or register." });
   } else { //Login User
-    req.session.user = username;
+    req.session.user = username; //Store username in session
     console.log("User logged in: " + req.session.user);
     res.redirect("dashboard");
   }
@@ -74,8 +74,17 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.get("/dashboard", (req, res) => {
+app.get("/dashboard", ensureLogin, (req, res) => {
   res.render("dashboard", { username: req.session.user });
 });
+
+//Make sure user is logged in
+function ensureLogin(req, res, next) {
+  if (!req.session.user) {
+    res.redirect('/login');
+  } else {
+    next();
+  }
+}
 
 app.listen(8080, () => console.log("Server running at http://localhost:8080"));
