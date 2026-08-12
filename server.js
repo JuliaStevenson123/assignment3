@@ -2,6 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const connectDB = require("./config/db");
 const Users = require("./models/Users");
+require('pg'); // explicitly require the "pg" module (for Vercel) 
+const Sequelize = require("sequelize");
 
 const app = express();
 
@@ -22,8 +24,58 @@ app.use(express.json());
 app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
 
-// Connect to DB
-connectDB();
+// Connect to Databases
+connectDB(); // MongoDB
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: "postgres",
+  dialectOptions: {
+    ssl: {require: true, rejectUnauthorized: false},
+  },
+});
+
+// Define Tasks model
+const Tasks = sequelize.define('Tasks', {
+  id: {
+    type: Sequelize.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,//auto generate
+  },
+  title: {
+    type: Sequelize.STRING,
+    allowNull: false,//required
+  },
+  description: Sequelize.TEXT,
+  dueDate: Sequelize.DATE,
+  status: {
+    type: Sequelize.STRING,
+    defaultValue: "Pending",//default value
+  },
+  userId: {
+    type: Sequelize.STRING,
+    allowNull: false,//required
+  },
+  createdAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW,//default value
+  },
+  updatedAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW,//default value
+  },
+});
+
+// Sync or create table in postgres
+sequelize.sync().then(() => {
+  // create a new "Project" and add it to the database
+  Tasks.create({
+    title: 'Test',
+    userId: 'Test'
+  }).then((tasks) => {
+      console.log('SQL table success!');
+  }).catch((error) => {
+      console.log('something went wrong!: ' + error);
+  });
+});
 
 //User variable
 var user = null;
