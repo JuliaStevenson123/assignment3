@@ -44,8 +44,10 @@ const Tasks = sequelize.define('Tasks', {
     type: Sequelize.STRING,
     allowNull: false,//required
   },
-  description: Sequelize.TEXT,
-  dueDate: Sequelize.DATE,
+  description: { type: Sequelize.TEXT,
+    defaultValue: "" //default value
+  },
+  dueDate: Sequelize.DATE, 
   status: {
     type: Sequelize.STRING,
     defaultValue: "Pending",//default value
@@ -127,9 +129,39 @@ app.post("/register", async (req, res) => {
   }
 });
 
+//Dashboard
 app.get("/dashboard", ensureLogin, (req, res) => {
   res.render("dashboard", { username: req.session.user.username });
 });
+
+// Display list of tasks
+app.get("/tasks", ensureLogin, (req, res) => {
+  Tasks.findAll({
+    attributes: [title, description, dueDate, status, createdAt, updatedAt], //List of retreived data
+    where: { userId: req.session.user.id }, //Filter by userId
+  }).then((tasks) => {
+    res.render("tasks", { tasks: tasks, id: req.session.user.id });
+  });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //Make sure user is logged in
 function ensureLogin(req, res, next) {

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Task</title>
+</head>
+<body>
+    <form action="/edit" method="POST">
+        <label>Title:</label>
+        <input type="text" id="title" name="title" required placeholder="<%=title%>">
+        <br>
+
+        <label>Description:</label>
+        <input type="text" id="description" name="description" required placeholder="<%=description %>"   >
+        <br>
+
+        <label>Due Date:</label>
+        <input type="date" id="dueDate" name="dueDate" required placeholder="<%=dueDate %>">
+        <br>
+
+        <button type="submit">Edit Task</button>    
+    </form>
+    <br>
+
+    <a href="/tasks">Back to Tasks</a>
+</body>
+</html>

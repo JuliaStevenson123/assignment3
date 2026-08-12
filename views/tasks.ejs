@@ -9,7 +9,27 @@
     <h1>Your Tasks</h1>
     <br>
 
-    <ul id="taskList" name="taskList"></ul>
+    <ul>
+        <%
+            myHTML = '';
+            for (task in tasks) {//iterate through tasks
+                console.log(task);
+                myHTML += '<li>
+                    <p>Title: ' + task.title + '</p>
+                    <p>Description: ' + task.description + '</p>
+                    <p>Due Date: ' + task.dueDate + '</p>
+                    <p>Status: ' + task.status + '</p>
+                    <p>Created At: ' + task.createdAt + '</p>
+                    <p>Updated At: ' + task.updatedAt + '</p>
+                    <button onclick="/tasks/edit/' + id + '">Edit</button>
+                    <button onclick="/tasks/delete/' + id + '">Delete</button>
+                    <button onclick="/tasks/status/' + id + '">Change Status</button>
+                </li>';
+            }
+        > 
+        <%- myHTML >
+        
+    </ul>
     <br>
 
     <a href="/add">Add Task</a>
