@@ -11,35 +11,37 @@
 
     <ul>
         <%
-            myHTML = '';
-            for (task in tasks) {//iterate through tasks
-                console.log(task);
-                myHTML += '<li>
+            let myHTML = '';
+            for (const task of tasks) {
+                myHTML += `<li>
                     <p>Title: ${task.title}</p>
                     <p>Description: ${task.description}</p>
                     <p>Due Date: ${task.dueDate}</p>
                     <p>Status: ${task.status}</p>
                     <p>Created At: ${task.createdAt}</p>
                     <p>Updated At: ${task.updatedAt}</p>
-                    <a href="/tasks/edit/' + id + '">Edit</a>
-                    <button onclick="/tasks/delete/' + id + '">Delete</button>
-                    <button onclick="/tasks/status/' + id + '">Change Status</button>
-                </li>';
+                    <a href="/task/edit/${task.id}">Edit</a>
+                    <form action="/tasks/delete/${task.id}" method="POST" style="display:inline">
+                        <button type="submit">Delete</button>
+                    </form>
+                    <form action="/tasks/status/${task.id}" method="POST" style="display:inline">
+                        <button type="submit">Change Status</button>
+                    </form>
+                </li>`;
             }
-        > 
-        <%- myHTML >
-        
+        %>
+        <%- myHTML %>
     </ul>
     <br>
 
-    <a href="/add">Add Task</a>
+    <a href="/tasks/add">Add Task</a>
     <br>
 
     <a href="/dashboard">Back to Dashboard</a>
     <br>
 
     <form action="/logout" method="POST">
-        <button type="submit">Log Out</button> 
+        <button type="submit">Log Out</button>
     </form>
 </body>
 </html>
