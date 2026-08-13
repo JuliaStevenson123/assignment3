@@ -237,6 +237,4 @@ function ensureLogin(req, res, next) {
   }
 }
 
-/* app.listen(8080, () => console.log("Server running at http://localhost:8080")); */
-
-module.exports = app;
+app.listen(8080, () => console.log("Server running at http://localhost:8080"));
