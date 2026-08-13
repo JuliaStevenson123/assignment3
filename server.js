@@ -144,9 +144,73 @@ app.get("/tasks", ensureLogin, (req, res) => {
   });
 });
 
+//load form to add new task
+app.get("/tasks/add", ensureLogin, (req, res) => {
+  res.render("add");
+});
 
+app.post("/tasks/add", async, ensureLogin, (req, res) => {
+  //Get form answers
+  const { title, description, dueDate } = req.body;
 
+  //Add task to SQL database
+  await Tasks.create({
+    title: title,
+    description: description,
+    dueDate: dueDate,
+    userId: req.session.user.id
+  });
 
+  //Redirect to tasks page after submitting
+  res.redirect("/tasks");
+});
+
+app.get("/task/edit/:id", ensureLogin, (req, res) => {
+  Tasks.findAll({
+    attributes: [title, description, dueDate], //List of retreived data
+    where: { id: req.params.id }, //Filter by task id
+  }).then((tasks) => {// render page with preloaded data
+    res.render("tasks", { title: tasks[0].title, description: tasks[0].description, dueDate: tasks[0].dueDate});
+  });
+});
+
+app.post("/task/edit/:id", async, ensureLogin, (req, res) => {
+  const { title, description, dueDate } = req.body;
+  Tasks.update({
+      title: title,
+      description: description,
+      dueDate: dueDate
+    },{
+      where: { id: req.params.id }, //Get task by id
+  })
+});
+
+app.post("/tasks/delete/:id", async, ensureLogin, (req, res) => {
+  Tasks.destroy({
+    where: { id: req.params.id }, //Delete task by id
+  })
+
+  //reload page
+  res.redirect('/tasks');
+});
+
+app.post("/tasks/status/:id", async, ensureLogin, (req, res) => {
+  Tasks.findAll({status},{//get status}
+      where: { id: req.params.id }, //get by task id
+  }).then((tasks) => {
+    const currentStatus = tasks[0].status;
+    //status is pending if complete and complete if pending
+    const newStatus = currentStatus == "Pending" ? "Complete" : "Pending";
+
+    //update task
+    Name.update({status: newStatus,},{
+      where: { id: req.params.id }, //get task by id
+    })
+  });
+
+  //reload page
+  res.redirect('/tasks');
+});
 
 
 
