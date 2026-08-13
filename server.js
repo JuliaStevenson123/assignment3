@@ -73,7 +73,7 @@ sequelize.sync().then(() => {
     title: 'Test',
     userId: 'Test'
   }).then((tasks) => {
-      console.log('SQL table success!');
+      console.log('SQL initialization success and connected');
   }).catch((error) => {
       console.log('something went wrong!: ' + error);
   });
@@ -137,8 +137,8 @@ app.get("/dashboard", ensureLogin, (req, res) => {
 // Display list of tasks
 app.get("/tasks", ensureLogin, (req, res) => {
   Tasks.findAll({
-    attributes: [title, description, dueDate, status, createdAt, updatedAt], //List of retreived data
-    where: { userId: req.session.user.id }, //Filter by userId
+    attributes: ['title', 'description', 'dueDate', 'status', 'createdAt', 'updatedAt'], //List of retreived data
+    where: { userId: req.session.user._id }, //Filter by userId
   }).then((tasks) => {
     res.render("tasks", { tasks: tasks, id: req.session.user.id });
   });
@@ -149,7 +149,7 @@ app.get("/tasks/add", ensureLogin, (req, res) => {
   res.render("add");
 });
 
-app.post("/tasks/add", async, ensureLogin, (req, res) => {
+app.post("/tasks/add", ensureLogin, async (req, res) => {
   //Get form answers
   const { title, description, dueDate } = req.body;
 
@@ -158,7 +158,7 @@ app.post("/tasks/add", async, ensureLogin, (req, res) => {
     title: title,
     description: description,
     dueDate: dueDate,
-    userId: req.session.user.id
+    userId: req.session.user._id
   });
 
   //Redirect to tasks page after submitting
@@ -174,7 +174,7 @@ app.get("/task/edit/:id", ensureLogin, (req, res) => {
   });
 });
 
-app.post("/task/edit/:id", async, ensureLogin, (req, res) => {
+app.post("/task/edit/:id", ensureLogin, async (req, res) => {
   const { title, description, dueDate } = req.body;
   Tasks.update({
       title: title,
@@ -185,7 +185,7 @@ app.post("/task/edit/:id", async, ensureLogin, (req, res) => {
   })
 });
 
-app.post("/tasks/delete/:id", async, ensureLogin, (req, res) => {
+app.post("/tasks/delete/:id", ensureLogin, async (req, res) => {
   Tasks.destroy({
     where: { id: req.params.id }, //Delete task by id
   })
@@ -194,7 +194,7 @@ app.post("/tasks/delete/:id", async, ensureLogin, (req, res) => {
   res.redirect('/tasks');
 });
 
-app.post("/tasks/status/:id", async, ensureLogin, (req, res) => {
+app.post("/tasks/status/:id", ensureLogin, async (req, res) => {
   Tasks.findAll({status},{//get status}
       where: { id: req.params.id }, //get by task id
   }).then((tasks) => {
@@ -203,7 +203,7 @@ app.post("/tasks/status/:id", async, ensureLogin, (req, res) => {
     const newStatus = currentStatus == "Pending" ? "Complete" : "Pending";
 
     //update task
-    Name.update({status: newStatus,},{
+    Tasks.update({status: newStatus,},{
       where: { id: req.params.id }, //get task by id
     })
   });
@@ -211,21 +211,6 @@ app.post("/tasks/status/:id", async, ensureLogin, (req, res) => {
   //reload page
   res.redirect('/tasks');
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //Make sure user is logged in
 function ensureLogin(req, res, next) {
