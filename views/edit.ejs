@@ -6,17 +6,17 @@
     <title>Edit Task</title>
 </head>
 <body>
-    <form action="/edit" method="POST">
+    <form action="/task/edit/<%= id %>" method="POST">
         <label>Title:</label>
-        <input type="text" id="title" name="title" required placeholder="<%=title%>">
+        <input type="text" id="title" name="title" required value="<%= title %>">
         <br>
 
         <label>Description:</label>
-        <input type="text" id="description" name="description" required placeholder="<%=description %>"   >
+        <input type="text" id="description" name="description" required value="<%= description %>">
         <br>
 
         <label>Due Date:</label>
-        <input type="date" id="dueDate" name="dueDate" required placeholder="<%=dueDate %>">
+        <input type="date" id="dueDate" name="dueDate" required value="<%= dueDate ? dueDate.toISOString().split('T')[0] : '' %>">
         <br>
 
         <button type="submit">Edit Task</button>    

@@ -1,3 +1,15 @@
+/********************************************************************************
+* WEB322 – Assignment 03
+* 
+* I declare that this assignment is my own work in accordance with Seneca's
+* Academic Integrity Policy:
+* 
+* https://www.senecapolytechnic.ca/about/policies/academic-integrity-policy.html
+* 
+* Name: Julia Stevenson Student ID: 017184086 Date: August 14, 2026
+*
+********************************************************************************/
+
 require("dotenv").config();
 const express = require("express");
 const connectDB = require("./config/db");
@@ -137,7 +149,7 @@ app.get("/dashboard", ensureLogin, (req, res) => {
 // Display list of tasks
 app.get("/tasks", ensureLogin, (req, res) => {
   Tasks.findAll({
-    attributes: ['title', 'description', 'dueDate', 'status', 'createdAt', 'updatedAt'], //List of retreived data
+    attributes: ['id', 'title', 'description', 'dueDate', 'status', 'createdAt', 'updatedAt'], //List of retreived data
     where: { userId: req.session.user._id }, //Filter by userId
   }).then((tasks) => {
     res.render("tasks", { tasks: tasks, id: req.session.user.id });
@@ -167,22 +179,29 @@ app.post("/tasks/add", ensureLogin, async (req, res) => {
 
 app.get("/task/edit/:id", ensureLogin, (req, res) => {
   Tasks.findAll({
-    attributes: [title, description, dueDate], //List of retreived data
-    where: { id: req.params.id }, //Filter by task id
-  }).then((tasks) => {// render page with preloaded data
-    res.render("tasks", { title: tasks[0].title, description: tasks[0].description, dueDate: tasks[0].dueDate});
+    attributes: ['id', 'title', 'description', 'dueDate'],
+    where: { id: req.params.id, userId: req.session.user._id },
+  }).then((tasks) => {
+    res.render("edit", {
+      id: tasks[0].id,
+      title: tasks[0].title,
+      description: tasks[0].description,
+      dueDate: tasks[0].dueDate,
+    });
   });
 });
 
 app.post("/task/edit/:id", ensureLogin, async (req, res) => {
   const { title, description, dueDate } = req.body;
-  Tasks.update({
+  await Tasks.update({
       title: title,
       description: description,
       dueDate: dueDate
     },{
-      where: { id: req.params.id }, //Get task by id
-  })
+      where: { id: req.params.id, userId: req.session.user._id },
+  });
+
+  res.redirect("/tasks");
 });
 
 app.post("/tasks/delete/:id", ensureLogin, async (req, res) => {
@@ -195,21 +214,18 @@ app.post("/tasks/delete/:id", ensureLogin, async (req, res) => {
 });
 
 app.post("/tasks/status/:id", ensureLogin, async (req, res) => {
-  Tasks.findAll({status},{//get status}
-      where: { id: req.params.id }, //get by task id
+  Tasks.findAll({
+    where: { id: req.params.id, userId: req.session.user._id },
   }).then((tasks) => {
     const currentStatus = tasks[0].status;
-    //status is pending if complete and complete if pending
     const newStatus = currentStatus == "Pending" ? "Complete" : "Pending";
 
-    //update task
-    Tasks.update({status: newStatus,},{
-      where: { id: req.params.id }, //get task by id
-    })
+    Tasks.update({ status: newStatus }, {
+      where: { id: req.params.id, userId: req.session.user._id },
+    }).then(() => {
+      res.redirect('/tasks');
+    });
   });
-
-  //reload page
-  res.redirect('/tasks');
 });
 
 //Make sure user is logged in
